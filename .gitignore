@@ -163,3 +163,4 @@ cython_debug/
 output.csv
 output.xml
 config.py
+output.xlsx
