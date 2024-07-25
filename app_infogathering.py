@@ -1,75 +1,148 @@
 import requests
-from bs4 import BeautifulSoup
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import json
 import xml.etree.ElementTree as ET
+import pandas as pd
+from bs4 import BeautifulSoup
 
 # Step 1: User input and URL handling
 urls = []  # Store user-entered URLs here
+api_key = "AIzaSyCbkFJMUPVHbUUkXOe2a3zC1Xx291i5PEg"  # Replace with your actual API key
+
+# Prompt user to enter URLs
+print("Enter URLs (type 'done' when finished):")
+while True:
+    url = input("URL: ")
+    if url.lower() == 'done':
+        if urls:  # Check if at least one URL has been entered
+            break
+        else:
+            print("Please enter at least one URL.")
+    else:
+        urls.append(url)
 
 # Step 2: Extract information from URLs
-def extract_info(url):
+def extract_info(url, api_key):
     try:
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, 'html.parser')
+        video_id = url.split('v=')[1].split('&')[0]  # Extract video ID
+        api_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={video_id}&key={api_key}"
+        response = requests.get(api_url)
+        data = response.json()
 
-        # Step 3: Specific information extraction
-        title = soup.title.string.strip()
+        # Check if the response contains the expected fields
+        if 'items' in data and len(data['items']) > 0:
+            title = data['items'][0]['snippet']['title']
+            comments = {}  # Use a dictionary to store comments by their ID
 
-        # Example: Extract comments (modify as needed)
-        comments = [comment.text.strip() for comment in soup.find_all('div', class_='comment')]
+            # Fetch comments
+            api_url = f"https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId={video_id}&key={api_key}&maxResults=100"
+            response = requests.get(api_url)
+            data = response.json()
 
-        # Example: Extract keywords (modify as needed)
-        keywords = ['keyword1', 'keyword2']
-
-        return title, comments, keywords
+            for item in data['items']:
+                comment_id = item['snippet']['topLevelComment']['id']
+                comment_text = item['snippet']['topLevelComment']['snippet']['textDisplay']
+                like_count = item['snippet']['topLevelComment']['snippet']['likeCount']
+                # Replace <br> tags with newline characters
+                comment_text = comment_text.replace('<br>', '\n')
+                # Clean the comment text
+                clean_comment = BeautifulSoup(comment_text, "html.parser").get_text()
+                if comment_id in comments:
+                    comments[comment_id]['text'] += "\n" + clean_comment
+                    comments[comment_id]['like_count'] += like_count
+                else:
+                    comments[comment_id] = {'text': clean_comment, 'like_count': like_count, 'title': title}
+            return title, comments
+        else:
+            print(f"No video found for video ID {video_id}")
+            return None, None
     except Exception as e:
         print(f"Error fetching data from {url}: {e}")
-        return None, None, None
+        return None, None
+
+# Step 3: Categorize comments
+def categorize_comments(comments):
+    categories = {
+        "EV Performance": [],
+        "Connected Service": [],
+        "Interior Design": [],
+        "Exterior Design": [],
+        "Driving Performance": [],
+        "Fuel-efficient Performance": [],
+        "NVH Performance": []
+    }
+
+    for comment_id, comment_data in comments.items():
+        comment = comment_data['text']
+        like_count = comment_data['like_count']
+        title = comment_data['title']
+        if any(keyword in comment.lower() for keyword in ["チャージ", "チャージャー", "Chademo", "充電器", "充電", "電気", "EV", "バッテリー", "V2H", "H2V"]):
+            categories["EV Performance"].append((title, comment, like_count))
+        if any(keyword in comment.lower() for keyword in ["app", "アプリ", "Mercedes me", "メルセデスMe", "コネクテッド", "Connected"]):
+            categories["Connected Service"].append((title, comment, like_count))
+        if any(keyword in comment.lower() for keyword in ["インテリア", "室内", "狭い", "質感"]):
+            categories["Interior Design"].append((title, comment, like_count))
+        if any(keyword in comment.lower() for keyword in ["エクステリア", "外見", "ボディ", "塗装", "ステップ"]):
+            categories["Exterior Design"].append((title, comment, like_count))
+        if any(keyword in comment.lower() for keyword in ["加速", "減速", "走行", "巡航", "追い越し", "高速", "低速", "ワインディング"]):
+            categories["Driving Performance"].append((title, comment, like_count))
+        if any(keyword in comment.lower() for keyword in ["燃費"]):
+            categories["Fuel-efficient Performance"].append((title, comment, like_count))
+        if any(keyword in comment.lower() for keyword in ["ノイズ", "振動"]):
+            categories["NVH Performance"].append((title, comment, like_count))
+
+    return categories
 
 # Step 4: Export to XML
-def create_xml(title, comments, keywords):
+def create_xml(categories):
     root = ET.Element("data")
-    ET.SubElement(root, "title").text = title
-    for comment in comments:
-        ET.SubElement(root, "comment").text = comment
-    for keyword in keywords:
-        ET.SubElement(root, "keyword").text = keyword
+    for category, comments in categories.items():
+        category_element = ET.SubElement(root, "category", name=category)
+        ET.SubElement(category_element, "commentCount").text = str(len(comments))
+        for title, comment, like_count in comments:
+            comment_element = ET.SubElement(category_element, "comment")
+            ET.SubElement(comment_element, "title").text = title
+            comment_element.text = comment
+            ET.SubElement(comment_element, "likeCount").text = str(like_count)
     tree = ET.ElementTree(root)
-    tree.write("output.xml")
+    tree.write("output.xml", encoding="utf-8", xml_declaration=True)
 
-# Step 5: Share via email
-def send_email(recipients):
-    sender_email = "your_email@example.com"
-    subject = "Web Scraping Results"
-    body = "Please find the attached XML file."
+# Step 4: Export to CSV
+def create_csv(categories):
+    rows = []
+    for category, comments in categories.items():
+        for title, comment, like_count in comments:
+            rows.append([title, category, comment, like_count])
+    df = pd.DataFrame(rows, columns=["Title", "Category", "Comment", "LikeCount"])
+    df.to_csv("output.csv", index=False, encoding="utf-8")
 
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = ", ".join(recipients)
-    msg['Subject'] = subject
-
-    with open("output.xml", "rb") as attachment:
-        part = MIMEText(body, "plain")
-        msg.attach(part)
-
-        part = MIMEText(attachment.read(), "xml")
-        part.add_header('Content-Disposition', 'attachment', filename="output.xml")
-        msg.attach(part)
-
-    # Send email using smtplib (configure SMTP server details)
+# Step 4: Export to XLSX
+def create_xlsx(categories):
+    rows = []
+    for category, comments in categories.items():
+        for title, comment, like_count in comments:
+            rows.append([title, category, comment, like_count])
+    df = pd.DataFrame(rows, columns=["Title", "Category", "Comment", "LikeCount"])
+    df.to_excel("output.xlsx", index=False, encoding="utf-8", engine='openpyxl')
 
 # Example usage:
 if __name__ == "__main__":
-    url1 = "https://example.com/page1"
-    url2 = "https://example.com/page2"
-    urls.extend([url1, url2])
-
+    output_format = input("Enter output format (csv, xlsx, xml): ").lower()
+    all_comments = {}
     for url in urls:
-        title, comments, keywords = extract_info(url)
+        title, comments = extract_info(url, api_key)
         if title:
-            create_xml(title, comments, keywords)
-
-    recipients = ["recipient1@example.com", "recipient2@example.com"]
-    send_email(recipients)
+            for comment_id, comment_data in comments.items():
+                all_comments[comment_id] = comment_data
+    if all_comments:
+        categories = categorize_comments(all_comments)
+        if output_format == "xml":
+            create_xml(categories)
+        elif output_format == "csv":
+            create_csv(categories)
+        elif output_format == "xlsx":
+            create_xlsx(categories)
+        else:
+            print("Invalid output format. Please choose from 'csv', 'xlsx', or 'xml'.")
+        # Print the number of comments per category
+        for category, comments in categories.items():
+            print(f"{category}: {len(comments)} comments")
