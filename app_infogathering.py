@@ -52,28 +52,13 @@ def extract_info(url, api_key):
                     comments[comment_id]['like_count'] += like_count
                 else:
                     comments[comment_id] = {'text': clean_comment, 'like_count': like_count, 'title': title}
-
-            # Fetch transcripts
-            api_url = f"https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId={video_id}&key={api_key}"
-            response = requests.get(api_url)
-            data = response.json()
-
-            transcripts = {}
-            for item in data['items']:
-                if item['snippet']['language'] == 'jp':  # Change this to the language you want
-                    transcript_id = item['id']
-                    api_url = f"https://www.googleapis.com/youtube/v3/captions/{transcript_id}?key={api_key}"
-                    response = requests.get(api_url)
-                    transcript_text = response.text
-                    transcripts[transcript_id] = transcript_text
-
-            return title, comments, transcripts
+            return title, comments
         else:
             print(f"No video found for video ID {video_id}")
-            return None, None, None
+            return None, None
     except Exception as e:
         print(f"Error fetching data from {url}: {e}")
-        return None, None, None
+        return None, None
 
 # Step 3: Categorize comments
 def categorize_comments(comments):
@@ -138,7 +123,7 @@ def create_xlsx(categories):
         for title, comment, like_count in comments:
             rows.append([title, category, comment, like_count])
     df = pd.DataFrame(rows, columns=["Title", "Category", "Comment", "LikeCount"])
-    df.to_excel("output.xlsx", index=False, encoding="utf-8", engine='openpyxl')
+    df.to_excel("output.xlsx", index=False, engine='openpyxl')
 
 # Example usage:
 if __name__ == "__main__":
