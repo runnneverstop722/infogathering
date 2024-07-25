@@ -3,10 +3,11 @@ import json
 import xml.etree.ElementTree as ET
 import pandas as pd
 from bs4 import BeautifulSoup
+from config import API_KEY  # Import the API key from config.py
 
 # Step 1: User input and URL handling
 urls = []  # Store user-entered URLs here
-api_key = "AIzaSyCbkFJMUPVHbUUkXOe2a3zC1Xx291i5PEg"  # Replace with your actual API key
+api_key = API_KEY  # Use the imported API key
 
 # Prompt user to enter URLs
 print("Enter URLs (type 'done' when finished):")
@@ -51,13 +52,28 @@ def extract_info(url, api_key):
                     comments[comment_id]['like_count'] += like_count
                 else:
                     comments[comment_id] = {'text': clean_comment, 'like_count': like_count, 'title': title}
-            return title, comments
+
+            # Fetch transcripts
+            api_url = f"https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId={video_id}&key={api_key}"
+            response = requests.get(api_url)
+            data = response.json()
+
+            transcripts = {}
+            for item in data['items']:
+                if item['snippet']['language'] == 'jp':  # Change this to the language you want
+                    transcript_id = item['id']
+                    api_url = f"https://www.googleapis.com/youtube/v3/captions/{transcript_id}?key={api_key}"
+                    response = requests.get(api_url)
+                    transcript_text = response.text
+                    transcripts[transcript_id] = transcript_text
+
+            return title, comments, transcripts
         else:
             print(f"No video found for video ID {video_id}")
-            return None, None
+            return None, None, None
     except Exception as e:
         print(f"Error fetching data from {url}: {e}")
-        return None, None
+        return None, None, None
 
 # Step 3: Categorize comments
 def categorize_comments(comments):
