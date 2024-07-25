@@ -4,22 +4,34 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 from bs4 import BeautifulSoup
 from config import API_KEY  # Import the API key from config.py
+import re
 
 # Step 1: User input and URL handling
 urls = []  # Store user-entered URLs here
 api_key = API_KEY  # Use the imported API key
 
+# Function to validate URLs
+def is_valid_url(url):
+    regex = re.compile(
+        r'^(https?://)?(www\.)?(youtube\.com|youtu\.?be)/.+$'
+    )
+    return re.match(regex, url) is not None
+
 # Prompt user to enter URLs
-print("Enter URLs (type 'done' when finished):")
-while True:
-    url = input("URL: ")
-    if url.lower() == 'done':
-        if urls:  # Check if at least one URL has been entered
-            break
-        else:
-            print("Please enter at least one URL.")
-    else:
+print("Enter URLs (separated by commas):")
+url_input = input("URLs: ")
+url_list = [url.strip() for url in url_input.split(',')]
+
+# Validate and add URLs to the list
+for url in url_list:
+    if is_valid_url(url):
         urls.append(url)
+    else:
+        print(f"Invalid URL: {url}")
+
+if not urls:
+    print("No valid URLs entered. Exiting.")
+    exit()
 
 # Step 2: Extract information from URLs
 def extract_info(url, api_key):
