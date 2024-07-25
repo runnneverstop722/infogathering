@@ -88,11 +88,11 @@ class YouTubeCommentExtractor:
                 categories["EV Performance"].append((title, comment, like_count))
             if any(keyword in comment.lower() for keyword in ["app", "アプリ", "Mercedes me", "MercedesMe", "メルセデスMe", "コネクテッド", "Connected", "リモート", "Remote"]):
                 categories["Connected Service"].append((title, comment, like_count))
-            if any(keyword in comment.lower() for keyword in ["navi", "ナビ", "電子デバイス"]):
+            if any(keyword in comment.lower() for keyword in ["navi", "ナビ", "電子デバイス", "Screen", "スクリーン", "Hyper", "LCD", "液晶"]):
                 categories["Electric device"].append((title, comment, like_count))
-            if any(keyword in comment.lower() for keyword in ["インテリア", "室内", "車内", "狭い", "質感", "ambient", "アンビエント", "ボタン", "タッチ", "Touch", "Screen", "スクリーン", "Hyper"]):
+            if any(keyword in comment.lower() for keyword in ["インテリア", "室内", "車内", "狭い", "質感", "ambient", "アンビエント", "ボタン", "タッチ", "Touch"]):
                 categories["Interior Design"].append((title, comment, like_count))
-            if any(keyword in comment.lower() for keyword in ["エクステリア", "外見", "ボディ", "塗装", "ステップ", "LED", "ヘッドライト", "ヘッドランプ", "外装"]):
+            if any(keyword in comment.lower() for keyword in ["エクステリア", "外見", "ボディ", "塗装", "ステップ", "LED", "ヘッドライト", "ヘッドランプ", "外装", "ダサ", "かっこ", "格好", "かっこう"]):
                 categories["Exterior Design"].append((title, comment, like_count))
             if any(keyword in comment.lower() for keyword in ["加速", "減速", "走行", "巡航", "追い越し", "高速", "中速", "低速", "ワインディング"]):
                 categories["Driving Performance"].append((title, comment, like_count))
