@@ -17,7 +17,7 @@ The collected comments will be categorized.
 
 # Result
 ## Terminal
-<img width="385" alt="image" src="https://github.com/user-attachments/assets/62ef014b-253c-426f-be13-46420348a3ba">
+<img width="386" alt="image" src="https://github.com/user-attachments/assets/b8ddb504-2876-453b-b82b-e438ffe8e2e1">
 
 ## CSV file
 <img width="1555" alt="image" src="https://github.com/user-attachments/assets/eeb38eca-fe07-47b7-bee0-a635d50a30e3">
