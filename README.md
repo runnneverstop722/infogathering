@@ -6,7 +6,7 @@ The collected comments will be categorized.
 
 *You will need,
  - Google Cloud Project
- - YouTube API
+ - YouTube API (stored in 'config.py')
 
 # Structure
 <img width="217" alt="image" src="https://github.com/user-attachments/assets/a7565ea2-dbfb-4d4e-869e-cb27c78cb9cf">
