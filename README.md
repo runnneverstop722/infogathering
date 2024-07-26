@@ -9,13 +9,7 @@ The collected comments will be categorized.
  - YouTube API
 
 # Structure
-project_folder/
-│
-├── main.py
-├── youtube_extractor.py
-├── utils.py
-├── config.py
-└── requirements.txt
+<img width="375" alt="image" src="https://github.com/user-attachments/assets/a1b527bc-8856-4b61-a668-9ca8e349270a">
 
 # Run the app
 ## Input URLs and Selec output platform
