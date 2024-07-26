@@ -8,6 +8,15 @@ The collected comments will be categorized.
  - Google Cloud Project
  - YouTube API
 
+# Structure
+project_folder/
+│
+├── main.py
+├── youtube_extractor.py
+├── utils.py
+├── config.py
+└── requirements.txt
+
 # Run the app
 ## Input URLs and Selec output platform
 <img width="580" alt="image" src="https://github.com/user-attachments/assets/df0a9442-6124-427a-909e-3f794cc442af">
