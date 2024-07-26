@@ -1,6 +1,6 @@
 # Outline
 This Python app is for gathering comments from YouTube* if the comment hits the designated keywords.
-Users can input multiple URLs and get an output file among CSV, XLSX, and XML. (Selectable)
+Users can input multiple URLs and get an output file among CSV and XML. (Selectable)
 The output will be columned "Title, Category, Comment, LikeCount."
 The collected comments will be categorized.
 
