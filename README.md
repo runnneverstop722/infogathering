@@ -9,7 +9,7 @@ The collected comments will be categorized.
  - YouTube API
 
 # Structure
-<img width="375" alt="image" src="https://github.com/user-attachments/assets/a1b527bc-8856-4b61-a668-9ca8e349270a">
+<img width="217" alt="image" src="https://github.com/user-attachments/assets/a7565ea2-dbfb-4d4e-869e-cb27c78cb9cf">
 
 # Run the app
 ## Input URLs and Selec output platform
