@@ -77,6 +77,7 @@ class YouTubeCommentExtractor:
             comment = comment_data['text']
             like_count = comment_data['like_count']
             title = comment_data['title']
+            
             if any(keyword in comment.lower() for keyword in ["チャージ", "チャージャー", "Chademo", "充電", "電気", "EV", "バッテリー"]):
                 categories["Charging"].append((title, comment, like_count))
             if any(keyword in comment.lower() for keyword in ["バッテリー", "Battery"]):
@@ -93,7 +94,7 @@ class YouTubeCommentExtractor:
                 categories["Interior Design"].append((title, comment, like_count))
             if any(keyword in comment.lower() for keyword in ["エクステリア", "デザイン", "外見", "ボディ", "全幅", "サイズ", "ダサ", "かっこ", "格好"]):
                 categories["Exterior Design"].append((title, comment, like_count))
-            if any(keyword in comment.lower() for keyword in ["ノイズ", "振動", "インバーター", "高周波", "異音"]):
+            if any(keyword in comment.lower() for keyword in ["ノイズ", "振動", "インバーター", "高周波", "異音", "騒音", "走行音"]):
                 categories["NVH Performance"].append((title, comment, like_count))
 
         return categories
