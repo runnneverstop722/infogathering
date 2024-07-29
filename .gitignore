@@ -164,3 +164,6 @@ output.csv
 output.xml
 config.py
 output.xlsx
+youtube_analysis_results.xlsx
+raw_comments.csv
+detailed_insights.csv

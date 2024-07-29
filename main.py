@@ -1,4 +1,4 @@
-from youtube_extractor import YouTubeCommentExtractor
+from youtube_analysis import YouTubeCommentExtractor
 from config import API_KEY
 
 if __name__ == "__main__":
